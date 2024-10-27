@@ -11,7 +11,7 @@ const ipfs = create({ host: 'localhost', port: '5001', protocol: 'http' });
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:7545'));
 
 // Set up your Ethereum contract instance
-const contractAddress = '0x5c956d3e1df2a7e619666efcf4d3cf79546105f9'; // Replace with an actual address from Ganache
+const contractAddress = '0xda6b1d77a2de436c7e12f81944b7612c55ed0d99'; // Replace with an actual address from Ganache
 const abiPath = path.resolve(__dirname, '../contracts/DataStore.abi');
 
 if (!fs.existsSync(abiPath)) {
@@ -31,7 +31,7 @@ const contract = new web3.eth.Contract(contractABI, contractAddress);
 // console.log(contract.methods);  // Add this line to log the contract's methods
 
 // Data to be stored in IPFS
-const data = 'Contract CID: 0x5c956d3e1df2a7e619666efcf4d3cf79546105f9'; // encrypted data from your contract
+const data = 'Contract CID:  0xda6b1d77a2de436c7e12f81944b7612c55ed0d99'; // encrypted data from your contract
 
 const buffer = Buffer.from(data, 'utf-8');
 ipfs.add(buffer).then(result => {
