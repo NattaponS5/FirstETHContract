@@ -27,4 +27,12 @@ add override in package.json
 node update
 node install
 
-else, not follow me, bc idk
+else, don't follow me, bc idk
+
+-----------------------------------------
+Current npm
+├── ganache@6.4.5
+├── ipfs-http-client@53.0.1
+├── ipfs@0.66.1
+├── solc@0.8.28
+└── web3@4.14.0
