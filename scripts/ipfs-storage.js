@@ -11,7 +11,7 @@ const ipfs = create({ host: 'localhost', port: '5001', protocol: 'http' });
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:7545'));
 
 // Set up your Ethereum contract instance
-const contractAddress = '0x530737576345578af9Ca0b9411c237A08E82ae25'; // Replace with an actual address from Ganache
+const contractAddress = '0x5c956d3e1df2a7e619666efcf4d3cf79546105f9'; // Replace with an actual address from Ganache
 const abiPath = path.resolve(__dirname, '../contracts/DataStore.abi');
 
 if (!fs.existsSync(abiPath)) {
@@ -31,7 +31,7 @@ const contract = new web3.eth.Contract(contractABI, contractAddress);
 // console.log(contract.methods);  // Add this line to log the contract's methods
 
 // Data to be stored in IPFS
-const data = 'Something secret!!'; // encrypted data from your contract
+const data = 'Contract CID: 0x5c956d3e1df2a7e619666efcf4d3cf79546105f9'; // encrypted data from your contract
 
 const buffer = Buffer.from(data, 'utf-8');
 ipfs.add(buffer).then(result => {
@@ -42,7 +42,7 @@ ipfs.add(buffer).then(result => {
   const cidBytes = web3.utils.hexToBytes(web3.utils.asciiToHex(cid));
 
   // Store CID on Ethereum blockchain
-  contract.methods.storeData(1, cidBytes).send({ from: '0x530737576345578af9Ca0b9411c237A08E82ae25' }) // Adjust the parameters as needed
+  contract.methods.storeData(1, cidBytes).send({ from: '0x3aA4496169560D28259DAEfCD347B0d56Bcca515' }) // Adjust the parameters as needed
     .then(receipt => {
       console.log(`CID stored on blockchain: ${cid}`);
       console.log(`Transaction receipt:`, receipt);
