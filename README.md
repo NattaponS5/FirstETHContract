@@ -1,23 +1,46 @@
 install extensions: Install https://marketplace.visualstudio.com/items?itemName=JuanBlanco.solidity
 
+Please run in Linux
+
 npm install -g solc
 
 Open Ganache desktop application
+./ganache-2.7.1-linux-x86_64.AppImage
 
-run node scripts/deploy.js
+Open IPFS Desktop App
+./ipfs-desktop-0.39.0-linux-x86_64.AppImage
 
+Prepare your data to store in ETH and IPFS
+
+const hashDir = '/home/YOUR_PATH_TO/hash_plant_house_logs_400';
+const keyDir = '/home/YOUR_PATH_TO/aes_keys_logs';
+const encryptedDataDir = '/home/YOUR_PATH_TO/ciphertext_logs';
 
 ------------------------------------------
 For new solidity
 Write a new .sol code (Contract) then 
-run solcjs --bin --abi contracts/DataStore.sol --> Save both abi and bin in the contracts folder
+ 
+Save both abi and bin in the "build" folder using Solidity Code
+solcjs --bin --abi --output-dir ./build ./contracts/HashStorage.sol
 
-run node scripts/tojson.js
+node scripts/tojson.js; call bin and abi from "build" folder + create json in "contracts" folder
 
-lastly open Ganache desktop application & IPFS desktop
+add   ,
+  "networks": {
+    "5777": {
+      "address": "0x94dfdEa7C5746D8382cbd789A537c4bc31524A5B"
+    }
+  }
 
-node scripts/deploy.js ; set contract address (in block) & account address
+into the end of HashStorage.json; address is the contract address (can be any)
 
-node scripts/ipfs-storage.js ; copy created CID to callsecret.js
 
-node scripts/callsecret.js ; from http://localhost:8080/ipfs/{CID}
+node scripts/filestorage.js ; call contract at ganache; aeskey + ciphertext + nonce save to IPFS in HEX decode; hash value of plaintext send to Ganache as transaction hash: TX
+
+node python/save.js ; download data from http://localhost:8080/ipfs/{CID} to "download" subfolder inside the "python" folder, please fix CID inside the code
+
+python python/decrypt.py ; run to see the plaintext in the terminal
+
+node scripts/ethgetdata.js ; get hash value from Ethereum using Transcation Hash: TX
+
+----END----
