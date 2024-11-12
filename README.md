@@ -43,4 +43,14 @@ python python/decrypt.py ; run to see the plaintext in the terminal
 
 node scripts/ethgetdata.js ; get hash value from Ethereum using Transcation Hash: TX
 
+Decoded Parameters from ETH:
+Hash of PT: 8aaaa14ab531f24a155dcbe56f80e3789b337e0e8c094baf6baf80b0bbd2f566
+DeviceId: plant_house_9_sensor_9
+Timestamp: 2024-04-30_03-09-37
+CID: QmRZzqdkJy3JzgEeQYZhbiSimNk9wxhsvTzP1gxF7ZjjsH
+
 ----END----
+
+
+Note:
+Restart the ganache and IPFS every time when running new contract, because it lags. idk y

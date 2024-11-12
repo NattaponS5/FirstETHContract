@@ -90,16 +90,11 @@ async function processAllData(hashDir, keyDir, encryptedDataDir) {
             const encryptedData = encryptedDataBuffer.toString('hex');
             const nonce = nonceBuffer.toString('hex');
 
-            const hashToStore = '0x' + hash;
-            try {
-                const transactionHash = await instance.methods.storeHash(hashToStore).send({ from: accounts[0], gas: 3000000 });
-                console.log(`Hash ${i + 1} stored on Ethereum with transaction hash: ${transactionHash.transactionHash}`);
-            } catch (error) {
-                console.error('Error sending transaction:', error);
-            }
+            // ipfs part
+            let ipfsResult;
 
             try {
-                const ipfsResult = await ipfs.add({
+                ipfsResult = await ipfs.add({
                     path: `data_${i+1}.json`,
                     content: JSON.stringify({
                         aesKey: aesKeyString,
@@ -121,6 +116,35 @@ async function processAllData(hashDir, keyDir, encryptedDataDir) {
                 console.log(`IPFS Link: http://localhost:8080/ipfs/${ipfsResult.cid.toString()}`);
             } catch (error) {
                 console.error('Error adding data to IPFS:', error);
+            }
+
+            // Ethereum part
+
+            const hashToStore = '0x' + hash;
+
+            // Split the string and get the device ID by combining elements 1, 2, and 3
+            const pathComponents = hashFile.split('/');
+            const fileName = pathComponents[pathComponents.length - 1];
+            const components = fileName.split('_');
+
+            const deviceIdToStore = components.slice(0, -2).join('_');
+            console.log(`Device ID: ${deviceIdToStore}`);
+            const deviceIdToStoreH = web3.utils.asciiToHex(deviceIdToStore)
+
+            // Correct the timestamp processing
+            const timestampToStore = fileName.replace('.log.hash', '').split('_').slice(-2).join('_');
+            console.log(`Timestamp: ${timestampToStore}`);
+            const timestampToStoreH = web3.utils.asciiToHex(timestampToStore)
+
+            const cidToStore = ipfsResult.cid.toString();
+            console.log(`IPFS CID: ${cidToStore}`);
+            const cidToStoreH = web3.utils.asciiToHex(cidToStore)
+            
+            try {
+                const transactionHash = await instance.methods.storeData(deviceIdToStoreH, timestampToStoreH, hashToStore, cidToStoreH).send({ from: accounts[0], gas: 3000000 });
+                console.log(`Data ${i + 1} stored on Ethereum with transaction hash: ${transactionHash.transactionHash}`);
+            } catch (error) {
+                console.error('Error sending transaction:', error);
             }
         }
     } catch (error) {
