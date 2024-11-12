@@ -90,38 +90,6 @@ async function processAllData(hashDir, keyDir, encryptedDataDir) {
             const encryptedData = encryptedDataBuffer.toString('hex');
             const nonce = nonceBuffer.toString('hex');
 
-            // ipfs part
-            let ipfsResult;
-
-            try {
-                ipfsResult = await ipfs.add({
-                    path: `data_${i+1}.json`,
-                    content: JSON.stringify({
-                        aesKey: aesKeyString,
-                        encryptedData: encryptedData,
-                        nonce: nonce,
-                    }),
-                });
-
-                console.log("{");
-                console.log(`aesKey: ${aesKeyString}`);
-                console.log(`aesKey file location: ${keyFile}`);
-                console.log(`encryptedData: ${encryptedData}`);
-                console.log(`encryptedData file location: ${encryptedDataFile}`);
-                console.log(`nonce: ${nonce}`);
-                console.log(`nonce file location: ${nonceFile}`);
-                console.log("}");
-
-                console.log(`Data ${i + 1} (encrypted and key) stored on IPFS CID:`, ipfsResult.cid.toString());
-                console.log(`IPFS Link: http://localhost:8080/ipfs/${ipfsResult.cid.toString()}`);
-            } catch (error) {
-                console.error('Error adding data to IPFS:', error);
-            }
-
-            // Ethereum part
-
-            const hashToStore = '0x' + hash;
-
             // Split the string and get the device ID by combining elements 1, 2, and 3
             const pathComponents = hashFile.split('/');
             const fileName = pathComponents[pathComponents.length - 1];
@@ -136,8 +104,43 @@ async function processAllData(hashDir, keyDir, encryptedDataDir) {
             console.log(`Timestamp: ${timestampToStore}`);
             const timestampToStoreH = web3.utils.asciiToHex(timestampToStore)
 
+            const hashToStore = '0x' + hash;
+
+            // ipfs part
+            let ipfsResult;
+
+            try {
+                ipfsResult = await ipfs.add({
+                    path: `data_${i+1}.json`,
+                    content: JSON.stringify({
+                        deviceId: deviceIdToStoreH,
+                        timestamp: timestampToStoreH,
+                        hash: hashToStore,
+                        eccaesKey: aesKeyString,
+                        encryptedData: encryptedData,
+                        nonce: nonce,
+                    }),
+                });
+
+                console.log("{");
+                console.log(`aesKey: ${aesKeyString}`);
+                console.log(`aesKey file location: ${keyFile}`);
+                console.log(`encryptedData: ${encryptedData}`);
+                console.log(`encryptedData file location: ${encryptedDataFile}`);
+                console.log(`nonce: ${nonce}`);
+                console.log(`nonce file location: ${nonceFile}`);
+                console.log("}");
+
+                console.log(`Data ${i + 1} (DevID+TS+Hash+ECC(AES)+ENC(PT)+nonce) stored on IPFS CID:`, ipfsResult.cid.toString());
+                console.log(`IPFS Link: http://localhost:8080/ipfs/${ipfsResult.cid.toString()}`);
+            } catch (error) {
+                console.error('Error adding data to IPFS:', error);
+            }
+
+            // Ethereum part
+            // cidToStore rely on line 110 let ipfsResult;
             const cidToStore = ipfsResult.cid.toString();
-            console.log(`IPFS CID: ${cidToStore}`);
+            //console.log(`IPFS CID: ${cidToStore}`);
             const cidToStoreH = web3.utils.asciiToHex(cidToStore)
             
             try {
