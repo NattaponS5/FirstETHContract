@@ -43,14 +43,14 @@ def decrypt_aes_keys_with_ecc_private_keys(key):
         private_key_data = f.read()
     private_key = serialization.load_pem_private_key(private_key_data, password=None, backend=default_backend())
 
-    if device_id[:-8] == "plant_house_10":
-        public_key_file = os.path.join(ph_key_folder, f"{device_id[:-8]}_public_key.pem")
+    if device_id[:14] == "plant_house_10":
+        public_key_file = os.path.join(ph_key_folder, f"{device_id[:14]}_public_key.pem")
         # print("Public Key: ", public_key_file)
-        plant_house = device_id[:-8]
+        plant_house = device_id[:14]
     else:
-        public_key_file = os.path.join(ph_key_folder, f"{device_id[:-9]}_public_key.pem")
+        public_key_file = os.path.join(ph_key_folder, f"{device_id[:13]}_public_key.pem")
         # print("Public Key: ", public_key_file)
-        plant_house = device_id[:-9]
+        plant_house = device_id[:13]
 
     if not os.path.exists(public_key_file):
         print(f"Public key file not found for {device_id}. Skipping encryption for this plant house.")
@@ -66,7 +66,7 @@ def decrypt_aes_keys_with_ecc_private_keys(key):
     with open(dec_aes_key_file, 'wb') as f:
         f.write(aes_key)
 
-    print(f"AES key decrypted for {device_id}")
+    print(f"\nAES key decrypted for {device_id}")
 
     return aes_key
 
@@ -116,6 +116,7 @@ try:
     print("Device ID:", device_id)
     print("Timestamp:", timestamp)
     print("Hash:", hash)
+    print("\n")
     print(decrypted_data.decode('utf-8'))
 except UnicodeDecodeError:
     print("Decrypted data could not be decoded as UTF-8")

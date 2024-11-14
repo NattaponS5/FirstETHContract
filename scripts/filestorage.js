@@ -136,6 +136,18 @@ async function processAllData(hashDir, keyDir, encryptedDataDir) {
             } catch (error) {
                 console.error('Error adding data to IPFS:', error);
             }
+            // conclude all of the ipfsResult.cid.toString() and store in log folder create a file named "IPFS_CID.log"
+            const logDir = '/home/nattapons5/vscode/FirstETHContract/log';
+            const logFile = path.join(logDir, 'IPFS_CID.log');
+            const ethlogFile = path.join(logDir, 'ETH_CID.log');
+
+            try {
+                await fs.mkdir(logDir, { recursive: true });
+                await fs.appendFile(logFile, `${ipfsResult.cid.toString()},\n`);
+                // console.log(`IPFS CID ${ipfsResult.cid.toString()} logged to ${logFile}`);
+            } catch (error) {
+                console.error('Error writing IPFS CID to log file:', error);
+            }
 
             // Ethereum part
             // cidToStore rely on line 110 let ipfsResult;
@@ -145,7 +157,9 @@ async function processAllData(hashDir, keyDir, encryptedDataDir) {
             
             try {
                 const transactionHash = await instance.methods.storeData(deviceIdToStoreH, timestampToStoreH, hashToStore, cidToStoreH).send({ from: accounts[0], gas: 3000000 });
-                console.log(`Data ${i + 1} stored on Ethereum with transaction hash: ${transactionHash.transactionHash}`);
+                console.log(`\nData ${i + 1} stored on Ethereum with transaction hash: ${transactionHash.transactionHash}`);
+                await fs.appendFile(ethlogFile, `${transactionHash.transactionHash},\n`);
+                // console.log(`Transaction hash ${transactionHash.transactionHash} logged to ${ethlogFile}`);
             } catch (error) {
                 console.error('Error sending transaction:', error);
             }
