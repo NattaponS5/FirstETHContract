@@ -13,7 +13,7 @@ function hexToAscii(hex) {
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:7545'));
 
 // Transaction hash you want to look up
-const txHash = '0xb134cd8e480511c43447b42ac7a85c3aad381a12f33ed919de428b0313fffcde';
+const txHash = '0xe741f0326a3ab4e749b5018a8bb6e10d86397318163bc1248bee6ece3f2abac0';
 
 // Function to fetch and display the transaction details
 async function getTransactionDetails() {

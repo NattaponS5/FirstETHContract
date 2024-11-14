@@ -53,25 +53,25 @@ async function processAllData(hashDir, keyDir, encryptedDataDir) {
             const hashFile = hashFiles[i];
             let keyFile;
             if (hashFile.includes('plant_house_1_')) {
-                keyFile = path.join(keyDir, 'plant_house_1.key');
+                keyFile = path.join(keyDir, 'plant_house_1.key.enc');
             } else if (hashFile.includes('plant_house_2_')) {
-                keyFile = path.join(keyDir, 'plant_house_2.key');
+                keyFile = path.join(keyDir, 'plant_house_2.key.enc');
             } else if (hashFile.includes('plant_house_3_')) {
-                keyFile = path.join(keyDir, 'plant_house_3.key');
+                keyFile = path.join(keyDir, 'plant_house_3.key.enc');
             } else if (hashFile.includes('plant_house_4_')) {
-                keyFile = path.join(keyDir, 'plant_house_4.key');
+                keyFile = path.join(keyDir, 'plant_house_4.key.enc');
             } else if (hashFile.includes('plant_house_5_')) {
-                keyFile = path.join(keyDir, 'plant_house_5.key');
+                keyFile = path.join(keyDir, 'plant_house_5.key.enc');
             } else if (hashFile.includes('plant_house_6_')) {
-                keyFile = path.join(keyDir, 'plant_house_6.key');
+                keyFile = path.join(keyDir, 'plant_house_6.key.enc');
             } else if (hashFile.includes('plant_house_7_')) {
-                keyFile = path.join(keyDir, 'plant_house_7.key');
+                keyFile = path.join(keyDir, 'plant_house_7.key.enc');
             } else if (hashFile.includes('plant_house_8_')) {
-                keyFile = path.join(keyDir, 'plant_house_8.key');
+                keyFile = path.join(keyDir, 'plant_house_8.key.enc');
             } else if (hashFile.includes('plant_house_9_')) {
-                keyFile = path.join(keyDir, 'plant_house_9.key');
+                keyFile = path.join(keyDir, 'plant_house_9.key.enc');
             } else if (hashFile.includes('plant_house_10')) {
-                keyFile = path.join(keyDir, 'plant_house_10.key');
+                keyFile = path.join(keyDir, 'plant_house_10.key.enc');
             } else {
                 throw new Error(`No matching key file for hash file: ${hashFile}`);
             }
@@ -156,7 +156,7 @@ async function processAllData(hashDir, keyDir, encryptedDataDir) {
 }
 
 const hashDir = '/home/nattapons5/vscode/EncryptHash/hash_plant_house_logs_400';
-const keyDir = '/home/nattapons5/vscode/EncryptHash/aes_keys_logs';
+const keyDir = '/home/nattapons5/vscode/EncryptHash/enc_aes_key_logs';
 const encryptedDataDir = '/home/nattapons5/vscode/EncryptHash/ciphertext_logs';
 
 processAllData(hashDir, keyDir, encryptedDataDir);
