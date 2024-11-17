@@ -108,6 +108,8 @@ CID: QmYddbqBYgM6LrKKQfpAhTpPzE8qaJW1CpHdkjP35kCqoZ
 ----END----
 You can check they are all correlated to one another. Smiles face
 
+------------------------------------------
+
 For GraphQL to find secret in Ethereum
 install dependencies by
 
@@ -140,7 +142,43 @@ or
 
 you can see the txHash belongs to that query response 
 
+-----------------------------------------------------
 
+For checking data duplication
+
+Local:
+python python/localcheckdup.py
+
+######################
+Duplicate files found:
+Files with identical content: b'6b2e5e0d78a03ee8cfd8e3fb44f54ea27d72497902ef60b9d5ddf350497107f5'
+plant_house_10_sensor_32_2024-04-30_03-10-40.log.hash
+plant_house_10_sensor_10_2024-04-30_03-10-18.log.hash
+plant_house_10_sensor_11_2024-04-30_03-10-19.log.hash
+Files with identical content: b'b67e4f4834590861977409d9a2db9e0390e06aafb49097abdf82d649db17564c'
+plant_house_10_sensor_3_2024-04-30_03-10-11.log.hash
+plant_house_10_sensor_4_2024-04-30_03-10-12.log.hash
+######################
+
+Ethereum:
+node scripts/ethcheckdup.js
+
+######################
+Duplicate transaction inputs found:
+Input Slice: 6b2e5e0d78a03ee8cfd8e3fb44f54ea27d72497902ef60b9d5ddf350497107f5
+Transactions: [
+  '0xb389c151ed4cba27c28ff7aa4623eeb7a695ad784fdef47325b170e5104608ee',
+  '0x594b3d2128b9c5d15ea30935fed4695322b4497fb6f2d6e17b538c51bf2c8804',
+  '0xa909878367a3368e1b1f3d5ce2a2f3dee90bc4f481b676a54306d0d13ee008fd'
+]
+Input Slice: b67e4f4834590861977409d9a2db9e0390e06aafb49097abdf82d649db17564c
+Transactions: [
+  '0x8098d6d8583c3bce398cc0ac01e66b49e6182db9a2a91b82d2b8f9f01aad2f8d',
+  '0xc1c0d15eeb8065220538c72c11473df7c3d57f224075695167846ac7d31cd981'
+]
+######################
+
+-----------------------------------------------------
 
 Note:
 Restart the ganache and IPFS every time when running new contract, because it lags. idk why either :/
