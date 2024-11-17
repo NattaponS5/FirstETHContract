@@ -108,6 +108,39 @@ CID: QmYddbqBYgM6LrKKQfpAhTpPzE8qaJW1CpHdkjP35kCqoZ
 ----END----
 You can check they are all correlated to one another. Smiles face
 
+For GraphQL to find secret in Ethereum
+install dependencies by
+
+npm install express express-graphql graphql
+
+then run
+
+node GRAPHQL/findtxHash.js ; this will open port 4000
+
+open thundercilent and query something like
+
+{
+  "query": "{ searchTransaction(text1: \"plant_house_3_sensor_4\", text2: \"2024-04-30_03-05-32\") { hash input } }"
+}
+
+or 
+
+{
+  "query": "{ searchTransaction(text1: \"plant_house_9_sensor_9\") { hash input } }"
+}
+
+or 
+
+{
+  "query": "{ searchTransaction(text1: \"2024-04-30_03-09-37\") { hash input } }"
+}
+
+
+**text1 and text2 can be either timestamp or deviceId**
+
+you can see the txHash belongs to that query response 
+
+
 
 Note:
 Restart the ganache and IPFS every time when running new contract, because it lags. idk why either :/

@@ -47,8 +47,20 @@ const root = {
 
     // Filter transactions based on whether text2 is provided
     if (text2) {
+      // hex text1 and text2 twice to match the input data
+      text1 = web3.utils.asciiToHex(web3.utils.asciiToHex(text1));
+      // slice the first 6 bit out
+      text1 = text1.slice(6, );
+      text2 = web3.utils.asciiToHex(web3.utils.asciiToHex(text2));
+      // slice the first 6 bit out
+      text2 = text2.slice(6, );
+
       return transactions.filter(tx => tx.input.includes(text1) && tx.input.includes(text2));
     } else {
+      // hex text1 twice to match the input data  
+      text1 = web3.utils.asciiToHex(web3.utils.asciiToHex(text1));
+      // slice the first 6 bit out
+      text1 = text1.slice(6, );
       return transactions.filter(tx => tx.input.includes(text1));
     }
   },
