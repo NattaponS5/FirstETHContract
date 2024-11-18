@@ -122,7 +122,7 @@ node GRAPHQL/findtxHash.js ; this will open port 4000
 open thundercilent and query something like
 
 {
-  "query": "{ searchTransaction(text1: \"plant_house_3_sensor_4\", text2: \"2024-04-30_03-05-32\") { hash input } }"
+  "query": "{ searchTransaction(text1: \"plant_house_3_sensor_4\", text2: \"2024-11-01_12-15-00\") { hash input } }"
 }
 
 or 
@@ -134,7 +134,7 @@ or
 or 
 
 {
-  "query": "{ searchTransaction(text1: \"2024-04-30_03-09-37\") { hash input } }"
+  "query": "{ searchTransaction(text1: \"2024-11-01_12-15-00\") { hash input } }"
 }
 
 

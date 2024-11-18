@@ -1,8 +1,6 @@
 const express = require('express');
 const { graphqlHTTP } = require('express-graphql');
 const { buildSchema } = require('graphql');
-const fs = require('fs');
-const path = require('path');
 const { Web3 } = require('web3');
 
 // Web3 setup
@@ -45,26 +43,54 @@ const root = {
   searchTransaction: async ({ text1, text2 }) => {
     const transactions = await getTransactionHashes();
 
-    // Filter transactions based on whether text2 is provided
-    if (text2) {
-      // hex text1 and text2 twice to match the input data
-      text1 = web3.utils.asciiToHex(web3.utils.asciiToHex(text1));
-      // slice the first 6 bit out
-      text1 = text1.slice(6, );
-      text2 = web3.utils.asciiToHex(web3.utils.asciiToHex(text2));
-      // slice the first 6 bit out
-      text2 = text2.slice(6, );
+    let countbit = 92;
+    let endat = 110; // Adjust to capture more bits if necessary
 
-      return transactions.filter(tx => tx.input.includes(text1) && tx.input.includes(text2));
-    } else {
-      // hex text1 twice to match the input data  
+    // check if the last char is _
+    let secondLastChartext1 = text1 ? text1.charAt(text1.length - 2) : '';
+    let secondLastChartext2 = text2 ? text2.charAt(text2.length - 2) : '';
+    if (secondLastChartext1 === '_' || secondLastChartext2 === '_') {
+      countbit = 88;
+    }
+
+    // Ensure sufficient bits are captured for differentiation
+    if (text2) {
+      // Hexadecimal conversions
       text1 = web3.utils.asciiToHex(web3.utils.asciiToHex(text1));
-      // slice the first 6 bit out
-      text1 = text1.slice(6, );
-      return transactions.filter(tx => tx.input.includes(text1));
+      text1 = text1.slice(6, endat);
+    
+      text2 = web3.utils.asciiToHex(web3.utils.asciiToHex(text2));
+      text2 = text2.slice(6, endat);
+    
+      // Correctly filter by ensuring enough recorded bits from the encoding
+      return transactions.filter(tx => tx.input.includes(text1) && tx.input.includes(text2));
+    } 
+    else {
+      text1 = web3.utils.asciiToHex(web3.utils.asciiToHex(text1));
+      // console.log(text1);
+      text1 = text1.slice(6, endat);
+      // console.log(text1);
+      // console.log(text1.length)
+      const filteredTransactions = transactions.filter(tx => tx.input.includes(text1));
+      if (filteredTransactions.length > 1) {
+        // console.log('filteredTransactions', filteredTransactions);
+        // console.log(countbit);
+        for (const filteredTran of filteredTransactions) {
+          // console.log((filteredTran.input.slice(330 + text1.length + 4 ,330 + text1.length + 6)));
+          if ((filteredTran.input.slice(330, 330 + text1.length).length === countbit) && (filteredTran.input.slice(330 + text1.length +4 ,330 + text1.length + 6) === "00")) {
+            // console.log(text1);
+            // console.log(filteredTran.input.slice(330, 330 + text1.length).length);
+            // console.log('filteredTran', filteredTran);
+            return [filteredTran];
+          }
+        }
+        return [];
+      }
+      return filteredTransactions;
     }
   },
 };
+
 
 // Create an express app
 const app = express();
