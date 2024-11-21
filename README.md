@@ -20,6 +20,7 @@ const encryptedDataDir = '/home/YOUR_PATH_TO/ciphertext_logs';
 
 ------------------------------------------
 For new solidity
+
 Write a new .sol code (Contract) then 
  
 Save both abi and bin in the "build" folder using Solidity Code
@@ -179,6 +180,3 @@ Transactions: [
 ######################
 
 -----------------------------------------------------
-
-Note:
-Restart the ganache and IPFS every time when running new contract, because it lags. idk why either :/
