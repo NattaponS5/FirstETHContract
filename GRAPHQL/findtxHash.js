@@ -34,16 +34,16 @@ const schema = buildSchema(`
   }
 
   type Query {
-    searchTransaction(text1: String!, text2: String): [Transaction]
+    searchTransaction(text1: String, text2: String, textcontains: String): [Transaction]
   }
 `);
 
 // Resolver functions
 const root = {
-  searchTransaction: async ({ text1, text2 }) => {
+  searchTransaction: async ({ text1, text2, textcontains }) => {
     const transactions = await getTransactionHashes();
 
-    let countbit = 92;
+    // let countbit = 92;
     let endat = 110; // Adjust to capture more bits if necessary
 
     // check if the last char is _
@@ -65,32 +65,20 @@ const root = {
       // Correctly filter by ensuring enough recorded bits from the encoding
       return transactions.filter(tx => tx.input.includes(text1) && tx.input.includes(text2));
     } 
+    else if (textcontains) {
+      return transactions.filter(tx => tx.input.includes(textcontains));
+    } 
     else {
       text1 = web3.utils.asciiToHex(web3.utils.asciiToHex(text1));
-      // console.log(text1);
       text1 = text1.slice(6, endat);
-      // console.log(text1);
-      // console.log(text1.length)
       const filteredTransactions = transactions.filter(tx => tx.input.includes(text1));
       if (filteredTransactions.length > 1) {
-        // console.log('filteredTransactions', filteredTransactions);
-        // console.log(countbit);
-        for (const filteredTran of filteredTransactions) {
-          // console.log((filteredTran.input.slice(330 + text1.length + 4 ,330 + text1.length + 6)));
-          if ((filteredTran.input.slice(330, 330 + text1.length).length === countbit) && (filteredTran.input.slice(330 + text1.length +4 ,330 + text1.length + 6) === "00")) {
-            // console.log(text1);
-            // console.log(filteredTran.input.slice(330, 330 + text1.length).length);
-            // console.log('filteredTran', filteredTran);
-            return [filteredTran];
-          }
-        }
-        return [];
+        return filteredTransactions;
       }
       return filteredTransactions;
     }
   },
 };
-
 
 // Create an express app
 const app = express();
