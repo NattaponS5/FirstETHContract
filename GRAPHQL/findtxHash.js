@@ -43,7 +43,7 @@ const root = {
   searchTransaction: async ({ text1, text2, textcontains }) => {
     const transactions = await getTransactionHashes();
 
-    // let countbit = 92;
+    let countbit = 92;
     let endat = 110; // Adjust to capture more bits if necessary
 
     // check if the last char is _
@@ -73,7 +73,15 @@ const root = {
       text1 = text1.slice(6, endat);
       const filteredTransactions = transactions.filter(tx => tx.input.includes(text1));
       if (filteredTransactions.length > 1) {
-        return filteredTransactions;
+        // console.log('filteredTransactions', filteredTransactions);
+        // console.log(countbit);
+        const result = [];
+        for (const filteredTran of filteredTransactions) {
+          if ((filteredTran.input.slice(330, 330 + text1.length).length === countbit) && (filteredTran.input.slice(330 + text1.length + 4, 330 + text1.length + 6) === "00")) {
+            result.push(filteredTran);
+          }
+        }
+        return result;
       }
       return filteredTransactions;
     }
