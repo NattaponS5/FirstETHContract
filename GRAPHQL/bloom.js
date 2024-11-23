@@ -1,16 +1,12 @@
-const { buildSchema } = require('graphql');
-const { Web3 } = require('web3');
 const express = require('express');
 const { graphqlHTTP } = require('express-graphql');
+const { buildSchema } = require('graphql');
+const { Web3 } = require('web3');
 const { AdaptiveBloomFilter } = require('./AdaptiveBloomFilter');
 
 // Web3 setup
 const web3 = new Web3('http://localhost:7545');
 
-// Adaptive Bloom Filter instance
-const adaptiveBloomFilter = new AdaptiveBloomFilter();
-
-// Function to fetch transaction hashes from Ganache
 async function getTransactionHashes() {
     const accounts = await web3.eth.getAccounts();
     const firstAccount = accounts[0];
@@ -31,15 +27,6 @@ async function getTransactionHashes() {
     return transactions;
 }
 
-// Function to update the Bloom filter with new transactions
-async function updateBloomFilter() {
-    const transactions = await getTransactionHashes();
-    transactions.forEach(tx => {
-        adaptiveBloomFilter.add(tx.hash);
-    });
-}
-
-// Function to check for duplicate transaction inputs
 async function checkDuplicateTxInput() {
     const latestBlock = await web3.eth.getBlockNumber();
     const txInputs = new Map();
@@ -68,63 +55,70 @@ async function checkDuplicateTxInput() {
     return duplicates;
 }
 
-// GraphQL schema
+// Combined GraphQL schema
 const schema = buildSchema(`
-    type Duplicate {
-        inputSlice: String
-        hashes: [String]
-    }
-
     type Transaction {
         hash: String
         input: String
     }
 
+    type Duplicate {
+        inputSlice: String
+        hashes: [String]
+    }
+
     type Query {
-        findDuplicates: [Duplicate]
         searchTransaction(text1: String, text2: String, textcontains: String): [Transaction]
+        findDuplicates: [Duplicate]
     }
 `);
 
 // Resolver functions
 const root = {
+    searchTransaction: async ({ text1, text2, textcontains }) => {
+        const transactions = await getTransactionHashes();
+
+        let countbit = 92;
+        let endat = 110; // Adjust to capture more bits if necessary
+
+        // check if the last char is _
+        let secondLastChartext1 = text1 ? text1.charAt(text1.length - 2) : '';
+        let secondLastChartext2 = text2 ? text2.charAt(text2.length - 2) : '';
+        if (secondLastChartext1 === '_' || secondLastChartext2 === '_') {
+            countbit = 88;
+        }
+
+        // Ensure sufficient bits are captured for differentiation
+        if (text2) {
+            // Hexadecimal conversions
+            text1 = web3.utils.asciiToHex(web3.utils.asciiToHex(text1));
+            text1 = text1.slice(6, endat);
+        
+            text2 = web3.utils.asciiToHex(web3.utils.asciiToHex(text2));
+            text2 = text2.slice(6, endat);
+        
+            // Correctly filter by ensuring enough recorded bits from the encoding
+            return transactions.filter(tx => tx.input.includes(text1) && tx.input.includes(text2));
+        } 
+        else {
+            text1 = web3.utils.asciiToHex(web3.utils.asciiToHex(text1));
+            text1 = text1.slice(6, endat);
+            const filteredTransactions = transactions.filter(tx => tx.input.includes(text1));
+            if (filteredTransactions.length > 1) {
+                const result = [];
+                for (const filteredTran of filteredTransactions) {
+                    if ((filteredTran.input.slice(330, 330 + text1.length).length === countbit) && (filteredTran.input.slice(330 + text1.length + 4, 330 + text1.length + 6) === "00")) {
+                        result.push(filteredTran);
+                    }
+                }
+                return result;
+            }
+            return filteredTransactions;
+        }
+    },
     findDuplicates: async () => {
         const duplicates = await checkDuplicateTxInput();
         return duplicates;
-    },
-    searchTransaction: async ({ text1, text2, textcontains }) => {
-        const transactions = await getTransactionHashes();
-        const filteredTransactions = transactions.filter(tx => adaptiveBloomFilter.contains(tx.hash));
-
-        // Further refine based on input criteria
-        const refineTransactions = (transactions, text1, text2, textcontains) => {
-            let endat = 110;
-            let secondLastChartext1 = text1 ? text1.charAt(text1.length - 2) : '';
-            let secondLastChartext2 = text2 ? text2.charAt(text2.length - 2) : '';
-            if (secondLastChartext1 === '_' || secondLastChartext2 === '_') {
-                endat = 88;
-            }
-
-            if (text2) {
-                text1 = web3.utils.asciiToHex(web3.utils.asciiToHex(text1));
-                text1 = text1.slice(6, endat);
-                text2 = web3.utils.asciiToHex(web3.utils.asciiToHex(text2));
-                text2 = text2.slice(6, endat);
-                return transactions.filter(tx => tx.input.includes(text1) && tx.input.includes(text2));
-            } else if (textcontains) {
-                return transactions.filter(tx => tx.input.includes(textcontains));
-            } else {
-                text1 = web3.utils.asciiToHex(web3.utils.asciiToHex(text1));
-                text1 = text1.slice(6, endat);
-                const filtered = transactions.filter(tx => tx.input.includes(text1));
-                if (filtered.length > 1) {
-                    return filtered;
-                }
-                return filtered;
-            }
-        };
-
-        return refineTransactions(filteredTransactions, text1, text2, textcontains);
     },
 };
 
@@ -140,8 +134,22 @@ app.use('/graphqlbloom', graphqlHTTP({
 
 // Start the server
 app.listen(4000, () => {
-    console.log('Running a GraphQL API server at http://localhost:4000/graphqlbloom');
+    console.log('Running a combined GraphQL API server at http://localhost:4000/graphqlbloom');
 });
+// Initialize AdaptiveBloomFilter
+const bloomFilter = new AdaptiveBloomFilter();
 
-// Periodically update the Bloom filter
-setInterval(updateBloomFilter, 60000); // Update every minute
+// Populate the bloom filter with transaction inputs
+async function populateBloomFilter() {
+    const transactions = await getTransactionHashes();
+    transactions.forEach(tx => {
+        bloomFilter.add(tx.input);
+    });
+}
+
+// Populate the bloom filter on server start
+populateBloomFilter().then(() => {
+    console.log('Bloom filter populated with transaction inputs.');
+}).catch(err => {
+    console.error('Error populating bloom filter:', err);
+});
