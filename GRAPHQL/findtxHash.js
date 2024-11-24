@@ -82,14 +82,20 @@ const root = {
         const result = [];
         for (const filteredTran of filteredTransactions) {
           //console.log(filteredTran);
-          //console.log(text1.length);
+          // console.log(text1.length);
           if (text1.length === 92){
             if (filteredTran.input.slice(330 + text1.length + 4, 330 + text1.length + 8) === "0000"){
               result.push(filteredTran);
             }
           }
+          if (text1.length === 96){
+            if (filteredTran.input.slice(330 + text1.length + 4 + 4, 330 + text1.length + 8 + 4) === "0000"){
+              result.push(filteredTran);
+            }
+          }
+
           
-          if ((filteredTran.input.slice(330, 330 + text1.length).length === countbit) && (filteredTran.input.slice(330 + text1.length + 4, 330 + text1.length + 6) === "00") && (text1.length != 92)) {
+          if ((filteredTran.input.slice(330, 330 + text1.length).length === countbit) && (filteredTran.input.slice(330 + text1.length + 4, 330 + text1.length + 6) === "00") && (text1.length != 92) && (text1.length != 96)) {
           result.push(filteredTran);
           }
         }
