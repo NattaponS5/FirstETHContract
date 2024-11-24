@@ -89,24 +89,26 @@ const root = {
         }
 
         // Ensure sufficient bits are captured for differentiation
-        if (text2) {
+        let filteredTransactions = transactions;
+
+        if (text2 != "") {
+            console.log("have text2");
             // Hexadecimal conversions
-            text1 = web3.utils.asciiToHex(web3.utils.asciiToHex(text1));
-            text1 = text1.slice(6, endat);
-        
             text2 = web3.utils.asciiToHex(web3.utils.asciiToHex(text2));
             text2 = text2.slice(6, endat);
-        
-            // Correctly filter by ensuring enough recorded bits from the encoding
-            return transactions.filter(tx => tx.input.includes(text1) && tx.input.includes(text2));
-        } 
-        else if (textcontains) {
-            return transactions.filter(tx => tx.input.includes(textcontains));
-        } 
-        else {
+            filteredTransactions = filteredTransactions.filter(tx => tx.input.includes(text2));
+        }
+
+        if (textcontains != "") {
+            console.log("have textcontains");
+            filteredTransactions = filteredTransactions.filter(tx => tx.input.includes(textcontains));
+        }
+
+        if (text1 != "") {
+            console.log("have text1");
             text1 = web3.utils.asciiToHex(web3.utils.asciiToHex(text1));
             text1 = text1.slice(6, endat);
-            const filteredTransactions = transactions.filter(tx => tx.input.includes(text1));
+            filteredTransactions = filteredTransactions.filter(tx => tx.input.includes(text1));
             if (filteredTransactions.length > 1) {
                 const result = [];
                 for (const filteredTran of filteredTransactions) {
@@ -116,8 +118,9 @@ const root = {
                 }
                 return result;
             }
-            return filteredTransactions;
         }
+
+        return filteredTransactions;
     },
     findDuplicates: async () => {
         const duplicates = await checkDuplicateTxInput();

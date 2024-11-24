@@ -169,8 +169,8 @@ async function processAllData(hashDir, keyDir, encryptedDataDir) {
     }
 }
 
-const hashDir = '/home/nattapons5/vscode/EncryptHash/hash_plant_house_logs_400_2';
-const keyDir = '/home/nattapons5/vscode/EncryptHash/enc_aes_key_logs_2';
-const encryptedDataDir = '/home/nattapons5/vscode/EncryptHash/ciphertext_logs_2';
+const hashDir = '/home/nattapons5/vscode/EncryptHash/hash_plant_house_logs_400_1';
+const keyDir = '/home/nattapons5/vscode/EncryptHash/enc_aes_key_logs_1';
+const encryptedDataDir = '/home/nattapons5/vscode/EncryptHash/ciphertext_logs_1';
 
 processAllData(hashDir, keyDir, encryptedDataDir);
