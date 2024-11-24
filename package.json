@@ -1,14 +1,7 @@
 {
-  "name": "firstethcontract",
-  "version": "1.0.0",
-  "description": "install extensions: Install https://marketplace.visualstudio.com/items?itemName=JuanBlanco.solidity",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
+    "cross-spawn": "^7.0.6",
+    "electron-eval": "^0.9.3",
     "express": "^4.21.1",
     "express-graphql": "^0.12.0",
     "fs": "^0.0.1-security",
@@ -17,8 +10,8 @@
     "ipfs": "^0.66.1",
     "ipfs-http-client": "^53.0.1",
     "react": "^18.3.1",
-    "solc": "^0.8.17",
-    "web3": "^4.14.0"
+    "solc": "^0.8.28",
+    "web3": "^4.15.0"
   },
   "overrides": {
     "electron": "33.0.2",

@@ -100,6 +100,9 @@ const root = {
             // Correctly filter by ensuring enough recorded bits from the encoding
             return transactions.filter(tx => tx.input.includes(text1) && tx.input.includes(text2));
         } 
+        else if (textcontains) {
+            return transactions.filter(tx => tx.input.includes(textcontains));
+        } 
         else {
             text1 = web3.utils.asciiToHex(web3.utils.asciiToHex(text1));
             text1 = text1.slice(6, endat);

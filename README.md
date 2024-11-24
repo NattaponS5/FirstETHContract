@@ -4,7 +4,32 @@ install extensions: Install https://marketplace.visualstudio.com/items?itemName=
 
 Please run in Linux
 
-npm install -g solc
+nvm use 20 
+
+npm uninstall $(ls node_modules)
+
+rm -rf node_modules
+
+rm package-lock.json
+
+npm install express@^4.21.1 express-graphql@^0.12.0 fs@^0.0.1-security
+
+npm install ganache@^6.4.5 graphql@^15.9.0 ipfs@^0.66.1
+
+npm install ipfs-http-client@^53.0.1 react@^18.3.1 solc@^0.8.17 web3@^4.14.0
+
+add overrides
+,
+  "overrides": {
+    "electron": "33.0.2",
+    "request": "2.88.2",
+    "nugget": "2.2.0",
+    "electron-download": "4.1.1",
+    "tough-cookie": "5.0.0"
+  },
+  "keywords": []
+
+There should be 2 high severity vulnerabilities. it's fine
 
 Open Ganache desktop application
 ./ganache-2.7.1-linux-x86_64.AppImage
