@@ -77,15 +77,15 @@ const root = {
       text1 = text1.slice(6, endat);
       filteredTransactions = filteredTransactions.filter(tx => tx.input.includes(text1));
       if (filteredTransactions.length > 1) {
-      //console.log('filteredTransactions', filteredTransactions);
-      //console.log(countbit);
-      const result = [];
-      for (const filteredTran of filteredTransactions) {
-        if ((filteredTran.input.slice(330, 330 + text1.length).length === countbit) && (filteredTran.input.slice(330 + text1.length + 4, 330 + text1.length + 6) === "00")) {
-        result.push(filteredTran);
+        //console.log('filteredTransactions', filteredTransactions);
+        //console.log(countbit);
+        const result = [];
+        for (const filteredTran of filteredTransactions) {
+          if ((filteredTran.input.slice(330, 330 + text1.length).length === countbit) && (filteredTran.input.slice(330 + text1.length + 4, 330 + text1.length + 6) === "00")) {
+          result.push(filteredTran);
+          }
         }
-      }
-      return result;
+        return result;
       }
     }
 
