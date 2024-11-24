@@ -3,7 +3,7 @@ import requests
 
 # example ipfs link: http://localhost:8080/ipfs/QmNNnmALiGdBgiYHPffoyDQr1L5LKQeG2cnSC39uztgq3D
 
-CID = 'QmYddbqBYgM6LrKKQfpAhTpPzE8qaJW1CpHdkjP35kCqoZ'
+CID = 'QmZRQLrXCPDhq1pYDyhQWvRce5UbeGsgxATaKHFAtn1NaY'
 
 def retrieve_data_from_cid(cid):
     url = f'http://localhost:8080/ipfs/{cid}'

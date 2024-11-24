@@ -29,10 +29,10 @@ def decrypt_data_with_shared_secret(shared_secret, ciphertext):
     return plaintext
 
 def decrypt_aes_keys_with_ecc_private_keys(key):
-    user_key_folder = "/home/nattapons5/vscode/EncryptHash/keygen_user_logs"
-    ph_key_folder = "/home/nattapons5/vscode/EncryptHash/keygen_planthouse_logs"
-    enc_aes_keys_folder = "/home/nattapons5/vscode/EncryptHash/encrypted_aes_keys"
-    dec_aes_keys_folder = "/home/nattapons5/vscode/EncryptHash/decrypted_aes_keys"
+    user_key_folder = "/home/nattapons5/vscode/EncryptHash/keygen_user_logs" # no number
+    ph_key_folder = "/home/nattapons5/vscode/EncryptHash/keygen_planthouse_logs" # no number
+    enc_aes_keys_folder = "/home/nattapons5/vscode/EncryptHash/encrypted_aes_keys_1"
+    dec_aes_keys_folder = "/home/nattapons5/vscode/EncryptHash/decrypted_aes_keys_1"
 
     if not os.path.exists(dec_aes_keys_folder):
         os.makedirs(dec_aes_keys_folder)

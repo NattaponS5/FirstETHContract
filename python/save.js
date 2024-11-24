@@ -1,15 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 
-const CID = 'QmYddbqBYgM6LrKKQfpAhTpPzE8qaJW1CpHdkjP35kCqoZ';
+const CID = 'QmRT2ej4u3wmnjpmtfS12TCG6j86WsJCFvuQ8Dag1qTSpx';
 
-// Example function to retrieve data from CID
 async function retrieveDataFromCID(cid) {
-    const url = `http://localhost:8080/ipfs/${cid}`;
+    const url = `http://127.0.0.1:8080/ipfs/${cid}`;
     try {
+        const fetch = (await import('node-fetch')).default; // Dynamically import node-fetch
         const response = await fetch(url);
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error(`Network response was not ok. Status: ${response.status}`);
         }
         const data = await response.text();
         return data;
@@ -18,11 +18,16 @@ async function retrieveDataFromCID(cid) {
     }
 }
 
-// Ensure the function is defined before calling it
 retrieveDataFromCID(CID)
     .then(secret => {
         console.log('Secret:', secret);
-        const downloadPath = path.join(__dirname, 'download', 'data.json');
+
+        const downloadDir = path.join(__dirname, 'download');
+        if (!fs.existsSync(downloadDir)) {
+            fs.mkdirSync(downloadDir);
+        }
+
+        const downloadPath = path.join(downloadDir, 'data.json');
         fs.writeFileSync(downloadPath, JSON.stringify({ secret }, null, 2));
         console.log('Data saved to', downloadPath);
     })
