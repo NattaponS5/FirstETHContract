@@ -2,7 +2,7 @@ const express = require('express');
 const { graphqlHTTP } = require('express-graphql');
 const { buildSchema } = require('graphql');
 const { Web3 } = require('web3');
-const { AdaptiveBloomFilter } = require('./AdaptiveBloomFilter');
+const AdaptiveBloomFilter = require('./AdaptiveBloomFilter'); // Import the AdaptiveBloomFilter class
 
 // Web3 setup
 const web3 = new Web3('http://localhost:7545');
@@ -150,6 +150,7 @@ app.use('/graphqlbloom', graphqlHTTP({
 app.listen(4000, () => {
     console.log('Running a combined GraphQL API server at http://localhost:4000/graphqlbloom');
 });
+
 // Initialize AdaptiveBloomFilter
 const bloomFilter = new AdaptiveBloomFilter();
 
@@ -167,3 +168,40 @@ populateBloomFilter().then(() => {
 }).catch(err => {
     console.error('Error populating bloom filter:', err);
 });
+
+// Pre-filter query function
+async function preFilterQuery(text1, text2, textcontains) {
+    // Check if any of the query parameters are in the Bloom Filter
+    if (text1 && !bloomFilter.contains(text1)) {
+        return [];
+    }
+    if (text2 && !bloomFilter.contains(text2)) {
+        return [];
+    }
+    if (textcontains && !bloomFilter.contains(textcontains)) {
+        return [];
+    }
+
+    // If all query parameters are in the Bloom Filter, proceed with the GraphQL query
+    return await root.searchTransaction({ text1, text2, textcontains });
+}
+
+// Function to calculate false positive rate (implement this function)
+function calculateFalsePositiveRate() {
+    // Implement logic to calculate the false positive rate
+    return 0.05; // Example value
+}
+
+// Periodically adjust the Bloom Filter
+function adjustBloomFilter() {
+    const falsePositiveRate = calculateFalsePositiveRate();
+    bloomFilter.adapt(falsePositiveRate);
+}
+
+setInterval(adjustBloomFilter, 60000); // Adjust every minute
+
+// // Example usage of preFilterQuery
+// // You can integrate this function into your GraphQL resolver or any other part of your application
+// preFilterQuery('someText1', 'someText2', 'someTextContains').then(result => {
+//     console.log(result);
+// });
