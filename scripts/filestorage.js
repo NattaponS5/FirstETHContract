@@ -2,11 +2,12 @@ const { create } = require('ipfs-http-client');
 const { Web3 } = require('web3');
 const { promises: fs } = require('fs');
 const path = require('path');
-const { Buffer } = require('buffer');
+const BloomFilter = require('./bloomFilter'); // Import Bloom Filter class
+const AdaptiveBloomFilter = require('./adaptiveBloomFilter');  // Import AdaptiveBloomFilter class
+
 
 const contract = require('../contracts/HashStorage.json'); // Make sure this file exists and is correctly generated
 const ipfs = create({ host: 'localhost', port: '5001', protocol: 'http' });
-
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:7545'));
 
 async function getFiles(dir) {
@@ -19,6 +20,30 @@ async function getFiles(dir) {
     }
 }
 
+async function loadFilterFromFile(filePath, FilterClass, ...constructorArgs) {
+    try {
+        const filterStateFile = path.join(__dirname, filePath);
+
+        // Check if the file exists
+        const fileExists = await fs.access(filterStateFile).then(() => true).catch(() => false);
+
+        if (fileExists) {
+            console.log(`Loading filter from file: ${filterStateFile}`);
+            // Load filter from file with the given constructor arguments
+            return await FilterClass.loadFromFile(filterStateFile, ...constructorArgs);
+        } else {
+            console.log(`${FilterClass.name} state file does not exist. Using a new filter.`);
+            // Return a new filter instance with the given constructor arguments
+            return new FilterClass(...constructorArgs);
+        }
+    } catch (error) {
+        console.error(`Error initializing ${FilterClass.name} from file ${filePath}:`, error);
+        // Return a new filter instance in case of error
+        return new FilterClass(...constructorArgs);
+    }
+}
+
+// Main processing logic for adding data to IPFS and Ethereum
 async function processAllData(hashDir, keyDir, encryptedDataDir) {
     try {
         const networkId = await web3.eth.net.getId();
@@ -49,8 +74,28 @@ async function processAllData(hashDir, keyDir, encryptedDataDir) {
 
         const accounts = await web3.eth.getAccounts();
 
+        const bloomFilter_2048_StateFile = path.join(__dirname, 'bloom_filter_2048_state.txt');
+        const bloomFilter_4096_StateFile = path.join(__dirname, 'bloom_filter_4096_state.txt');
+        const bloomFilter_8192_StateFile = path.join(__dirname, 'bloom_filter_8192_state.txt');
+        const adaptiveBloomFilterStateFile = path.join(__dirname, 'adaptive_bloom_filter_state.txt');
+
+        // Load the regular Bloom filter
+        const regularBloomFilter_2048 = await loadFilterFromFile('bloom_filter_2048_state.txt', BloomFilter, 2048, 3);
+        const regularBloomFilter_4096 = await loadFilterFromFile('bloom_filter_4096_state.txt', BloomFilter, 4096, 5);
+        const regularBloomFilter_8192 = await loadFilterFromFile('bloom_filter_8192_state.txt', BloomFilter, 8192, 7);
+        // Load the adaptive Bloom filter
+        const adaptiveBloomFilter = await loadFilterFromFile('adaptive_bloom_filter_state.txt', AdaptiveBloomFilter);
+
         for (let i = 0; i < hashFiles.length; i++) {
             const hashFile = hashFiles[i];
+
+            const hashData = await fs.readFile(hashFile, 'utf-8');
+
+            regularBloomFilter_2048.add(hashData);
+            regularBloomFilter_4096.add(hashData);
+            regularBloomFilter_8192.add(hashData);
+            adaptiveBloomFilter.add(hashData);
+
             let keyFile;
             if (hashFile.includes('plant_house_1_')) {
                 keyFile = path.join(keyDir, 'plant_house_1.key.enc');
@@ -122,14 +167,14 @@ async function processAllData(hashDir, keyDir, encryptedDataDir) {
                     }),
                 });
 
-                console.log("{");
-                console.log(`aesKey: ${aesKeyString}`);
-                console.log(`aesKey file location: ${keyFile}`);
-                console.log(`encryptedData: ${encryptedData}`);
-                console.log(`encryptedData file location: ${encryptedDataFile}`);
-                console.log(`nonce: ${nonce}`);
-                console.log(`nonce file location: ${nonceFile}`);
-                console.log("}");
+                // console.log("{");
+                // console.log(`aesKey: ${aesKeyString}`);
+                // console.log(`aesKey file location: ${keyFile}`);
+                // console.log(`encryptedData: ${encryptedData}`);
+                // console.log(`encryptedData file location: ${encryptedDataFile}`);
+                // console.log(`nonce: ${nonce}`);
+                // console.log(`nonce file location: ${nonceFile}`);
+                // console.log("}");
 
                 console.log(`Data ${i + 1} (DevID+TS+Hash+ECC(AES)+ENC(PT)+nonce) stored on IPFS CID:`, ipfsResult.cid.toString());
                 console.log(`IPFS Link: http://localhost:8080/ipfs/${ipfsResult.cid.toString()}`);
@@ -137,7 +182,7 @@ async function processAllData(hashDir, keyDir, encryptedDataDir) {
                 console.error('Error adding data to IPFS:', error);
             }
             // conclude all of the ipfsResult.cid.toString() and store in log folder create a file named "IPFS_CID.log"
-            const logDir = '/home/nattapons5/vscode/FirstETHContract/log';
+            const logDir = 'YOUR_PATH/FirstETHContract/log';
             const logFile = path.join(logDir, 'IPFS_CID.log');
             const ethlogFile = path.join(logDir, 'ETH_CID.log');
 
@@ -163,14 +208,35 @@ async function processAllData(hashDir, keyDir, encryptedDataDir) {
             } catch (error) {
                 console.error('Error sending transaction:', error);
             }
+
         }
+
+        await regularBloomFilter_2048.saveToFile(bloomFilter_2048_StateFile);
+        await regularBloomFilter_4096.saveToFile(bloomFilter_4096_StateFile);
+        await regularBloomFilter_8192.saveToFile(bloomFilter_8192_StateFile);
+        await adaptiveBloomFilter.saveToFile(adaptiveBloomFilterStateFile);
+
     } catch (error) {
         console.error('Error processing data:', error);
     }
 }
 
-const hashDir = '/home/nattapons5/vscode/EncryptHash/hash_plant_house_logs_400_9';
-const keyDir = '/home/nattapons5/vscode/EncryptHash/enc_aes_key_logs_9';
-const encryptedDataDir = '/home/nattapons5/vscode/EncryptHash/ciphertext_logs_9';
+const basePath = 'YOUR_PATH/EncryptHash/';
 
-processAllData(hashDir, keyDir, encryptedDataDir);
+// List of directory suffixes to iterate over
+const directorySuffixes = [1, 2, 8, 9];
+
+// Wrap the logic in an async function
+async function processDirectories() {
+    for (const suffix of directorySuffixes) {
+        const hashDir = `${basePath}hash_plant_house_logs_400_${suffix}`;
+        const keyDir = `${basePath}enc_aes_key_logs_${suffix}`;
+        const encryptedDataDir = `${basePath}ciphertext_logs_${suffix}`;
+        
+        // Await the processing to ensure it completes before moving to the next
+        await processAllData(hashDir, keyDir, encryptedDataDir);
+    }
+}
+
+// Call the async function
+processDirectories().catch(err => console.error(err));

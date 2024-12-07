@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duplicate Ethereum Transactions</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 0;
+      margin: 0;
+      background-color: #f4f4f9;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 20px; 
+    }
+
+    /* Navigation bar styles */
+    nav {
+      width: 100%;
+      background-color: #333;
+      padding: 10px 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 16px;
+    }
+
+    nav a:hover {
+      background-color: #575757;
+      border-radius: 4px;
+    }
+
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 400px;
+      text-align: center;
+      margin-top: 80px; /* Space for the navigation bar */
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #results {
+      margin-top: 20px;
+      width: 90%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+    }
+
+    .result-item {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #ffffff;
+      border-radius: 4px;
+      word-wrap: break-word;
+    }
+
+    #loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #loading-message {
+      color: white;
+      font-size: 20px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    /* Time display styles */
+    #time-display {
+      font-size: 14px;
+      margin-top: 10px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="duplicate.html">Duplicate Transactions</a>
+    <!-- Add other links as needed -->
+  </nav>
+
+  <div class="container">
+    <h1>Duplicate Ethereum Transactions</h1>
+    <button onclick="fetchDuplicates()">Fetch Duplicate Transactions</button>
+    <div id="time-display"></div>
+  </div>
+
+  <div id="results"></div>
+
+  <div id="loading-overlay">
+    <div id="loading-message">Loading, please wait...</div>
+  </div>
+
+  <script>
+    async function fetchDuplicates() {
+      document.getElementById('loading-overlay').style.display = 'flex';
+
+      const query = {
+        query: "{ findDuplicates { inputSlice hashes } }"
+      };
+
+      const startTime = performance.now(); // Start timing
+
+      try {
+        const response = await fetch('http://localhost:4000/graphql', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(query),
+        });
+
+        const result = await response.json();
+        const duplicates = result.data.findDuplicates;
+
+        const endTime = performance.now(); 
+        const duration = (endTime - startTime); 
+        document.getElementById('time-display').innerText = `Time taken: ${duration.toFixed(2)} ms`;
+
+        displayResults(duplicates);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        document.getElementById('loading-overlay').style.display = 'none';
+      }
+    }
+
+    function displayResults(duplicates) {
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '';
+
+        if (duplicates && duplicates.length > 0) {
+            duplicates.forEach((duplicate, index) => {
+            const duplicateElement = document.createElement('div');
+            duplicateElement.className = 'result-item';
+
+            // Create the input slice with the number of the item (index + 1)
+            let resultHTML = `<strong>Item #${index + 1}</strong><br>
+                                <strong>Input Slice:</strong> ${duplicate.inputSlice}<br><strong>Hashes:</strong><ul>`;
+            
+            // Loop through the hashes and create a list item for each one
+            duplicate.hashes.forEach(hash => {
+                resultHTML += `<li>${hash}</li>`;
+            });
+            
+            resultHTML += '</ul>';
+
+            duplicateElement.innerHTML = resultHTML;
+            resultsDiv.appendChild(duplicateElement);
+            });
+        } else {
+            resultsDiv.innerHTML = 'No duplicates found.';
+        }
+    }
+
+
+  </script>
+
+</body>
+</html>

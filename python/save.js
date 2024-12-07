@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const CID = 'QmRT2ej4u3wmnjpmtfS12TCG6j86WsJCFvuQ8Dag1qTSpx';
+const CID = 'Qma7YyzwcUpWHJh4ojC5r8LXTF1LamSzat6JHwYCAmGr4V';
 
 async function retrieveDataFromCID(cid) {
     const url = `http://127.0.0.1:8080/ipfs/${cid}`;

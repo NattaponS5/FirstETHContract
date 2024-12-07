@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Ethereum Transactions</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 0;
+      margin: 0;
+      background-color: #f4f4f9;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 20px; 
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px; /* Reduced width for better alignment */
+      margin-top: 20px;
+    }
+    
+
+    .input-group {
+      margin-top: 15px;
+      width: 95%;
+      text-align: left;
+    }
+
+    .input-group label {
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    input[type="number"], input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+      max-height: fit-content;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+        /* Navigation bar styles */
+    nav {
+      width: 100%;
+      background-color: #333;
+      padding: 10px 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 16px;
+    }
+
+    nav a:hover {
+      background-color: #575757;
+      border-radius: 4px;
+    }
+
+    #results {
+      margin-top: 20px;
+      max-height: 800px;
+      width: 90%;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+    }
+
+    .result-item {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #ffffff;
+      border-radius: 4px;
+      word-wrap: break-word;
+    }
+
+    .result-item strong {
+      color: #007bff;
+    }
+
+    #loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #loading-message {
+      color: white;
+      font-size: 20px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 8px;
+    }
+    h3 {
+      font-size: 18px;
+      color: #007bff; /* Use the same blue as the buttons */
+      font-weight: bold;
+      margin-bottom: 15px; /* Adds some space below each heading */
+      text-align: center; /* Centers the text */
+      position: relative; /* Allows for additional custom styling */
+    }
+
+    /* Separate box styling */
+    .separate-box {
+      margin-top: 20px;
+      padding: 20px;
+      border: 2px solid #007bff;
+      border-radius: 8px;
+      background-color: #ffffff;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="duplicate.html">Duplicate Transactions</a>
+  </nav>
+
+
+  <div class="container">
+    <h1>Search Ethereum Transactions</h1>
+
+    <!-- Separate box for Text 1 inputs (Plant and Sensor) -->
+    <div class="separate-box">
+      <div class="input-group">
+          <h3>text1</h3>
+        <label for="plant">Plant House Number:</label>
+        <input type="number" id="plant" placeholder="Enter plant house number (e.g., 9)">
+      </div>
+
+      <div class="input-group">
+        <label for="sensor">Sensor Number:</label>
+        <input type="number" id="sensor" placeholder="Enter sensor number (e.g., 9)">
+      </div>
+    </div>
+
+    <!-- Separate box for Text 2 inputs (Date and Time) -->
+    <div class="separate-box">
+      <div class="input-group">
+        <h3>text2</h3>
+        <label for="date">Date:</label>
+        <input type="text" id="date" placeholder="Enter date (e.g., 2024-11-01)">
+      </div>
+
+      <div class="input-group">
+        <label for="time">Time (HH-MM-SS format):</label>
+        <input type="text" id="time" placeholder="Enter time (e.g., 12-15-00)">
+      </div>
+    </div>
+
+    <!-- Separate box for Text Contains input -->
+    <div class="separate-box">
+      <div class="input-group">
+        <h3>textcontains</h3>
+        <label for="textcontains">Hash of Plaintext:</label>
+        <input type="text" id="textcontains" placeholder="Enter substring to search in input data">
+      </div>
+    </div>
+
+    <button onclick="searchTransactions()">Search Transactions</button>
+    <button onclick="searchTransactionsWithBloom8192()">Search Transactions with Bloom Filter (Need only Hash of Plaintext)</button>
+    <button onclick="searchTransactionsWithAdaptiveBloomFilter()">Search Transactions with Adaptive Bloom Filter (Need only Hash of Plaintext)</button>
+  </div>
+
+  <div id="results"></div>
+
+  <div id="loading-overlay">
+    <div id="loading-message">Loading, please wait...</div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.3/web3.min.js"></script>
+  <script>
+    async function searchTransactions() {
+      const plant = document.getElementById('plant').value;
+      const sensor = document.getElementById('sensor').value;
+      const date = document.getElementById('date').value;
+      const time = document.getElementById('time').value;
+      const textcontains = document.getElementById('textcontains').value;
+  
+      const text1 = (plant && sensor) ? `plant_house_${plant}_sensor_${sensor}` : "";
+      const text2 = (date && time) ? `${date}_${time}` : "";
+      const textContainsValue = textcontains || ""; // Use empty string if not filled
+
+      const startTime = performance.now();
+  
+      if (!text1 && !text2 && !textContainsValue) {
+        alert("Please fill at least one input field.");
+        return;
+      }
+  
+      document.getElementById('loading-overlay').style.display = 'flex';
+  
+      const query = {
+        query: `
+          query {
+            searchTransaction(
+              text1: "${text1}",
+              text2: "${text2}",
+              textcontains: "${textContainsValue}"
+            ) {
+              hash
+              input
+            }
+          }
+        `
+      };
+  
+      try {
+        const response = await fetch('http://localhost:4000/graphql', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(query),
+        });
+  
+        const result = await response.json();
+        const transactions = result.data.searchTransaction;
+
+        const endTime = performance.now();
+        const queryTime = (endTime - startTime).toFixed(2);
+
+        displayResults(transactions, queryTime);
+  
+        if (transactions && transactions.length > 0) {
+          for (let tx of transactions) {
+            await getTransactionDetails(tx.hash);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        document.getElementById('loading-overlay').style.display = 'none';
+      }
+    }
+
+    async function searchTransactionsWithBloom8192() {
+      const textcontains = document.getElementById('textcontains').value;
+      const textContainsValue = textcontains || ""; // Use empty string if not filled
+
+      const startTime = performance.now();
+  
+      if (!textContainsValue) {
+        alert("Please fill the hash of plaintext!");
+        return;
+      }
+
+      document.getElementById('loading-overlay').style.display = 'flex';
+
+
+      const bloomFilter8192Query = {
+        query: `
+          query {
+            searchWithBloomFilter8192(
+              textcontains: "${textContainsValue}"
+            ) {
+              hash
+              input
+            }
+          }
+        `
+      };
+
+      try {
+        const response = await fetch('http://localhost:4000/graphql', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bloomFilter8192Query),
+        });
+  
+        const result = await response.json();
+        const transactions = result.data.searchWithBloomFilter8192;
+
+        const endTime = performance.now();
+        const queryTime = (endTime - startTime).toFixed(2);
+
+        displayResults(transactions, queryTime);
+  
+        if (transactions && transactions.length > 0) {
+          for (let tx of transactions) {
+            await getTransactionDetails(tx.hash);
+          }
+        }
+      }  catch (error) {
+        console.error('Error fetching data with Bloom filter:', error);
+      } finally {
+        document.getElementById('loading-overlay').style.display = 'none';
+      }
+
+    }
+
+    async function searchTransactionsWithAdaptiveBloomFilter() {
+      const textcontains = document.getElementById('textcontains').value;
+      const textContainsValue = textcontains || ""; // Use empty string if not filled
+
+      const startTime = performance.now();
+  
+      if (!textContainsValue) {
+        alert("Please fill the hash of plaintext!");
+        return;
+      }
+
+      document.getElementById('loading-overlay').style.display = 'flex';
+
+
+      const AdaptiveBloomFilterQuery = {
+        query: `
+          query {
+            searchWithAdaptiveBloomFilter(
+              textcontains: "${textContainsValue}"
+            ) {
+              hash
+              input
+            }
+          }
+        `
+      };
+
+      try {
+        const response = await fetch('http://localhost:4000/graphql', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(AdaptiveBloomFilterQuery),
+        });
+  
+        const result = await response.json();
+        const transactions = result.data.searchWithAdaptiveBloomFilter;
+
+        const endTime = performance.now();
+        const queryTime = (endTime - startTime).toFixed(2);
+
+        displayResults(transactions, queryTime);
+  
+        if (transactions && transactions.length > 0) {
+          for (let tx of transactions) {
+            await getTransactionDetails(tx.hash);
+          }
+        }
+      }  catch (error) {
+        console.error('Error fetching data with Bloom filter:', error);
+      } finally {
+        document.getElementById('loading-overlay').style.display = 'none';
+      }
+
+    }
+  
+    function displayResults(transactions, queryTime) {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML =`<strong>Query Time:</strong> ${queryTime} ms<br><br>`;
+  
+      if (transactions && transactions.length > 0) {
+        transactions.forEach((tx, index) => {
+          const transactionElement = document.createElement('div');
+          transactionElement.className = 'result-item';
+          transactionElement.innerHTML = `
+            <strong>Item #${index + 1}</strong><br>
+            <strong>Transaction Hash:</strong> ${tx.hash}<br>
+            <strong>Input Data:</strong> ${tx.input}<br>
+            <div id="decoded-${tx.hash}"></div>
+          `;
+          resultsDiv.appendChild(transactionElement);
+        });
+      } else {
+        resultsDiv.innerHTML = `<strong>Query Time:</strong> ${queryTime} ms<br><br>
+        No transactions found.`;
+      }
+    }
+  
+    async function getTransactionDetails(txHash) {
+  const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:7545'));
+
+  try {
+    const transaction = await web3.eth.getTransaction(txHash);
+    if (transaction) {
+      const inputData = transaction.input;
+
+      // Define parameters with the correct slicing based on your description
+      const params = {
+        param1: inputData.slice(2, 10), // 8 bits (4 bytes)
+        param2: inputData.slice(10, 74), // 64 bits (32 bytes)
+        param3: inputData.slice(74, 138), // 64 bits (32 bytes)
+        param4: inputData.slice(138, 202), // 64 bits (32 bytes)
+        param5: inputData.slice(202, 266), // 64 bits (32 bytes)
+        param6: inputData.slice(266, 330), // 64 bits (32 bytes)
+        param7: inputData.slice(330, 458), // 128 bits (64 bytes)
+        param8: inputData.slice(458, 522), // 64 bits (32 bytes)
+        param9: inputData.slice(522, 650), // 128 bits (64 bytes)
+        param10: inputData.slice(650, 906)  // 256 bits (128 bytes)
+      };
+
+      // // Log the parameters for inspection
+      // console.log('Param 7:', params.param7);
+      // console.log('Param 9:', params.param9);
+      // console.log('Param 10:', params.param10);
+
+      // Remove leading zeroes from param10
+      params.param10 = params.param10.replace(/^0+/, '');
+      // console.log('Param 10 after removing leading zeroes:', params.param10);
+
+      // Ensure hex string is properly formatted (remove '0x' and ensure even length)
+      const dehexParams = {
+        param7: prepareHex(params.param7),
+        param9: prepareHex(params.param9),
+        param10: prepareHex(params.param10)
+      };
+
+      // console.log('\nAfter preparation:');
+      // console.log('DeviceId:', dehexParams.param7);
+      // console.log('Timestamp:', dehexParams.param9);
+      // console.log('CID:', dehexParams.param10);
+
+      // Decode the hex values once more to ASCII
+      const decodedParams = {
+        param7: hexToAscii(dehexParams.param7),
+        param9: hexToAscii(dehexParams.param9),
+        param10: hexToAscii(dehexParams.param10)
+      };
+
+      // console.log(decodedParams.param10)
+
+      // Now decode these results again since they appear to be hex encoded strings
+      const finalDecodedParams = {
+        param7: hexToAscii(decodedParams.param7),  // DeviceId
+        param9: hexToAscii(decodedParams.param9),  // Timestamp
+        param10: hexToAscii(prepareHex(decodedParams.param10)) // CID
+      };
+
+      // console.log('\nFinal Decoded Parameters:');
+      // console.log('DeviceId:', finalDecodedParams.param7);
+      // console.log('Timestamp:', finalDecodedParams.param9);
+      // console.log('CID:', finalDecodedParams.param10);
+
+      // Display the decoded data in the HTML
+      const decodedData = `
+        <strong>Decoded Data:</strong><br>
+        DeviceId: ${finalDecodedParams.param7 || 'Invalid ASCII'}<br>
+        Timestamp: ${finalDecodedParams.param9 || 'Invalid ASCII'}<br>
+        CID: ${finalDecodedParams.param10 || 'N/A'}
+      `;
+
+      const resultDiv = document.getElementById(`decoded-${txHash}`);
+      if (resultDiv) {
+        resultDiv.innerHTML = decodedData;
+      }
+    } else {
+      console.log('Transaction not found.');
+    }
+  } catch (error) {
+    console.error('Error fetching transaction:', error);
+  }
+}
+
+// Helper function to ensure hex string is valid and formatted
+function prepareHex(hex) {
+  // Strip '0x' if it exists
+  if (hex.startsWith('0x')) {
+    hex = hex.slice(2);
+  }
+
+  // Ensure the string has an even length
+  if (hex.length % 2 !== 0) {
+    hex = '0' + hex; // Add leading zero if length is odd
+  }
+
+  return hex;
+}
+
+// Helper function to convert hex to ASCII
+function hexToAscii(hex) {
+  let str = '';
+  for (let i = 0; i < hex.length; i += 2) {
+    str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  }
+  return str;
+}
+
+
+
+  </script>
+  
+</body>
+</html>

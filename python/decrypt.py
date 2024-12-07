@@ -31,11 +31,6 @@ def decrypt_data_with_shared_secret(shared_secret, ciphertext):
 def decrypt_aes_keys_with_ecc_private_keys(key):
     user_key_folder = "/home/nattapons5/vscode/EncryptHash/keygen_user_logs" # no number
     ph_key_folder = "/home/nattapons5/vscode/EncryptHash/keygen_planthouse_logs" # no number
-    enc_aes_keys_folder = "/home/nattapons5/vscode/EncryptHash/encrypted_aes_keys_1"
-    dec_aes_keys_folder = "/home/nattapons5/vscode/EncryptHash/decrypted_aes_keys_1"
-
-    if not os.path.exists(dec_aes_keys_folder):
-        os.makedirs(dec_aes_keys_folder)
 
     private_key_file = os.path.join(user_key_folder, "user_1_private_key.pem")
 
@@ -61,10 +56,6 @@ def decrypt_aes_keys_with_ecc_private_keys(key):
     shared_secret = derive_shared_secret(private_key, public_key)
 
     aes_key = decrypt_data_with_shared_secret(shared_secret, key)
-
-    dec_aes_key_file = os.path.join(dec_aes_keys_folder, "".join([plant_house, "_decrypted_aes_key.log"]))
-    with open(dec_aes_key_file, 'wb') as f:
-        f.write(aes_key)
 
     print(f"\nAES key decrypted for {device_id}")
 
@@ -101,10 +92,11 @@ try:
 
     key = bytes.fromhex(secret['eccaesKey'])  # Convert hex key to bytes
     nonce = bytes.fromhex(secret['nonce'])  # Convert hex nonce to bytes
-    # print(key)
+    print("Key: ", key)
+    print("Nonce: ", nonce)
     
     retrieved_aes_key = decrypt_aes_keys_with_ecc_private_keys(key)
-    # print(retrieved_aes_key)
+    print("Retrieved Key: ",retrieved_aes_key)
 
     encrypted_data = bytes.fromhex(secret['encryptedData'])  # Convert hex encrypted data to bytes
 except KeyError as e:
